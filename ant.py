@@ -93,3 +93,70 @@ def select_next_city(i):
         to_ += 1
 
     return to_
+
+
+def simulate_ants():
+    moving = 0
+
+    for k in range(MAX_ANTS):
+        if ants[k].path_index < MAX_CITIES:
+            ants[k].next_city = select_next_city(k)
+            ants[k].tabu[ants[k].next_city] = 1
+            ants[k].path_index += 1
+            ants[k].tour_length += distance[ants[k].curr_city, ants[k].next_city]
+
+            if ants[k].path_index == MAX_CITIES:
+                ants[k].tour_length += distance[ants[k].path[MAX_CITIES-1], ants[k].path[0]]
+
+            ants[k].curr_city = ants[k].next_city
+
+            moving += 1
+    return moving
+
+
+def update_trails():
+
+    for from_ in range(MAX_CITIES):
+        for to_ in range(MAX_CITIES):
+            if from_ != to_:
+                pheromone[from_, to_] *= (1.0 - RHO)
+                if pheromone[from_, to_] < 0:
+                    pheromone[from_, to_] = INIT_PHEROMONE
+
+    for ant in range(MAX_ANTS):
+        for i in range(MAX_CITIES):
+            if i < MAX_CITIES - 1:
+                from_ = ants[ant].path[i]
+                to_ = ants[ant].path[i + 1]
+            else:
+                from_ = ants[ant].path[i]
+                to_ = ants[ant].path[0]
+
+            pheromone[from_, to_] += Q / ants[ant].tour_length
+            pheromone[to_, from_] = pheromone[from_, to_]
+
+    for from_ in range(MAX_CITIES):
+        for to_ in range(MAX_CITIES):
+            pheromone[from_, to_] *= RHO
+
+
+def main():
+    curr_time = 0
+    init()
+
+    while curr_time < MAX_TIME:
+        curr_time += 1
+
+        if simulate_ants() == 0:
+            update_trails()
+            if curr_time != MAX_TIME:
+                restart_ants()
+            print('Time is {} ({})\n'.format(curr_time, best))
+
+    print('best tour {}\n'.format(best))
+    print('\n')
+    # show graph
+
+
+if __name__ == '__main__':
+    main()
