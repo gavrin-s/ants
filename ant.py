@@ -59,11 +59,13 @@ def restart_ants():
     global best
     global best_index
     global ants
-    ants = []
-    for i in randint(MAX_ANTS):
+    for i in range(MAX_ANTS):
         if ants[i].tour_length < best:
             best = ants[i].tour_length
             best_index = i
+
+    ants = []
+    for i in range(MAX_ANTS):
         ants.append(Ant())
 
 
